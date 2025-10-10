@@ -22,9 +22,9 @@ const ApiDocsPage: React.FC = () => {
 
       <h2 className="text-2xl font-semibold">1. Sunucuyu Hazırlama ve Sağlık Kontrolleri</h2>
       <p>
-        Evolution API&apos;yi Docker ile kurduysanız servis varsayılan olarak <code>http://HOST:8080</code> adresinde çalışır. İlk
-        doğrulama için konteynerin açık olduğundan emin olun ve kök uç noktaya bir GET isteği göndererek servis mesajını kontrol
-        edin.
+        Evolution API&apos;yi Docker ile kurduysanız servis varsayılan olarak <code>http://HOST:8080</code> adresinde çalışır.
+        {' '}İlk doğrulama için konteynerin açık olduğundan emin olun ve kök uç noktaya bir GET isteği göndererek servis
+        mesajını kontrol edin.
       </p>
       <CodeBlock>
         {`# Docker kurulumu için tipik başlatma
@@ -78,8 +78,9 @@ GET http://localhost:8080/
         </table>
       </div>
       <p className="mt-4">
-        Yanlış bir anahtar kullanıldığında servis <code>401 Unauthorized</code> döndürür. Bu durumda instance token&apos;ını yeniden
-        oluşturmak için yönetici panelinizden <code>/instance/delete</code> &rarr; <code>/instance/create</code> akışını kullanın.
+        Yanlış bir anahtar kullanıldığında servis <code>401 Unauthorized</code> döndürür.{' '}
+        Bu durumda instance token&apos;ını yeniden oluşturmak için yönetici panelinizden <code>/instance/delete</code>
+        &rarr; <code>/instance/create</code> akışını kullanın.
       </p>
 
       <Divider />
@@ -155,7 +156,8 @@ apikey: MASTER_TOKEN
 
       <h3 className="text-xl font-semibold mt-10">3.3 Bağlantı İzleme ve Bakım</h3>
       <p>
-        Instance yaşam döngüsündeki kritik uç noktalar aşağıdaki tabloda özetlenmiştir. Yanıtlar her zaman JSON döndürür.</p>
+        Instance yaşam döngüsündeki kritik uç noktalar aşağıdaki tabloda özetlenmiştir. Yanıtlar her zaman JSON döndürür.
+      </p>
       <div className="overflow-x-auto rounded-lg border border-slate-200 mt-4">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-50 text-left">
