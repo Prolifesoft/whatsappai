@@ -20,6 +20,63 @@ const ApiDocsPage: React.FC = () => {
 
       <Divider />
 
+      <h2 className="text-2xl font-semibold">0. Müşteri Paneli (Dashboard) Yol Haritası</h2>
+      <p>
+        Paket satın alan müşterilerin oturum açıp WhatsApp oturumlarını yönetebileceği bir panel kurmak için aşağıdaki
+        iş kalemlerini sırayla tamamlayın. Bu kontrol listesi geliştirmenin hangi aşamada olduğunu takip etmeyi ve API
+        entegrasyon adımlarını hangi bileşenlerin kullanacağını netleştirmeyi amaçlar.
+      </p>
+      <div className="overflow-x-auto rounded-lg border border-slate-200 mt-4">
+        <table className="min-w-full divide-y divide-slate-200 text-sm">
+          <thead className="bg-slate-50 text-left">
+            <tr>
+              <th className="px-4 py-3 font-semibold text-slate-700">Kategori</th>
+              <th className="px-4 py-3 font-semibold text-slate-700">Beklenen çıktı</th>
+              <th className="px-4 py-3 font-semibold text-slate-700">Notlar</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            <tr className="bg-white">
+              <td className="px-4 py-3">Kimlik doğrulama ve yetkilendirme</td>
+              <td className="px-4 py-3">Müşteri hesap açma, oturum açma ve token saklama akışları</td>
+              <td className="px-4 py-3">Evolution API master token yalnızca yönetici tarafında tutulmalı; müşterilere instance token dağıtımı yapılmalı.</td>
+            </tr>
+            <tr className="bg-slate-50">
+              <td className="px-4 py-3">Müşteri başına instance yönetimi</td>
+              <td className="px-4 py-3">Instance oluşturma, QR kod görüntüleme, bağlantı durumu ve yeniden başlatma kontrolleri</td>
+              <td className="px-4 py-3">Bu ekranlar doğrudan 3. bölümdeki lifecycle uç noktalarını tüketecek.</td>
+            </tr>
+            <tr className="bg-white">
+              <td className="px-4 py-3">Mesajlaşma araçları</td>
+              <td className="px-4 py-3">Tekil mesaj gönderimi, medya yükleme, kampanya/senaryo şablonları</td>
+              <td className="px-4 py-3">Gönderim geçmişi ve hata kayıtları için tablo + filtre tasarlayın.</td>
+            </tr>
+            <tr className="bg-slate-50">
+              <td className="px-4 py-3">Webhook &amp; etkinlik günlükleri</td>
+              <td className="px-4 py-3">Webhook URL ayarları, alınan olay listesini gösteren log ekranı</td>
+              <td className="px-4 py-3">Loglar; event tipi, tarih, payload özetini içermeli. Uyarı/alarmlar için queue veya e-posta tetikleyicileri planlayın.</td>
+            </tr>
+            <tr className="bg-white">
+              <td className="px-4 py-3">Faturalandırma ve paket yönetimi</td>
+              <td className="px-4 py-3">Paket kotası, yenileme tarihleri ve kullanım sayaçları</td>
+              <td className="px-4 py-3">Instance kota limitleri aşıldığında API erişimini sınırlayacak politikaları belirleyin.</td>
+            </tr>
+            <tr className="bg-slate-50">
+              <td className="px-4 py-3">Destek ve operasyon araçları</td>
+              <td className="px-4 py-3">Manuel müdahale için admin paneli, sistem sağlık göstergeleri</td>
+              <td className="px-4 py-3">Sunucu sağlık kontrolleri ve log takibi için bu sayfadaki API testlerini yeniden kullanın.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-4">
+        Her modül hazır olduğunda ilgili API bölümlerine geri dönerek istemci tarafı çağrılarını ve güvenlik kontrollerini
+        entegre edin. Aşağıdaki başlıklar bu yol haritasına göre sırasıyla sunucu, kimlik doğrulama ve instance yönetimi
+        aşamalarını detaylandırır.
+      </p>
+
+      <Divider />
+
       <h2 className="text-2xl font-semibold">1. Sunucuyu Hazırlama ve Sağlık Kontrolleri</h2>
       <p>
         Evolution API&apos;yi Docker ile kurduysanız servis varsayılan olarak <code>http://HOST:8080</code> adresinde çalışır.
