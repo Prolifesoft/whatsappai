@@ -150,7 +150,32 @@ GET http://localhost:8080/
 
       <h3 className="text-xl font-semibold mt-8">3.1 Temel Instance Oluşturma</h3>
       <p>
-        Master token ile <code>/instance/create</code> uç noktasına istek atın. <code>qrcode</code> alanını <code>true</code>
+        Üyelik açan müşteri önce panelde bir &ldquo;AI Agent&rdquo; kaydı oluşturur. Bu kayıttaki isim, Evolution API tarafında
+        açılacak instance&apos;ın <code>instanceName</code> alanına aynen yazılmalıdır. Dashboard&apos;daki &ldquo;New instance&rdquo;
+        formu için aşağıdaki kuralları zorunlu kılın:
+      </p>
+      <ul className="list-disc list-inside space-y-1">
+        <li>
+          <strong>Name*</strong>: AI Agent ekranında belirlenen benzersiz isim otomatik olarak bu alana doldurulmalı.
+        </li>
+        <li>
+          <strong>Channel</strong>: Sadece <code>Baileys</code> seçeneği gösterilip varsayılan olarak işaretlenmeli.
+        </li>
+        <li>
+          <strong>Token*</strong>: Arka planda üretilen güvenli bir anahtar otomatik doldurulmalı ve kullanıcıya sadece
+          kopyalama imkânı tanınmalı.
+        </li>
+        <li>
+          <strong>Number</strong>: 12 haneli olmalı ve <code>+90</code> ile başlaması gerektiği ipucu metninde belirtilmeli.
+        </li>
+      </ul>
+      <p className="mt-4">
+        Kullanıcı &ldquo;Oluştur&rdquo; butonuna bastığında hem dashboard veritabanında instance kaydı oluşturun hem de
+        <a className="text-sky-600 underline" href="https://serwer.prolifesoft.com/manager" target="_blank" rel="noreferrer">
+          https://serwer.prolifesoft.com/manager
+        </a>
+        servisine aynı payload ile isteği tetikleyin. Ardından master token ile <code>/instance/create</code> uç noktasına
+        çağrı yaparak Evolution API&apos;de gerçek instance&apos;ı açın. <code>qrcode</code> alanını <code>true</code>
         gönderdiğinizde yanıt gövdesine taratılabilir QR kodu da eklenir.
       </p>
       <CodeBlock>
