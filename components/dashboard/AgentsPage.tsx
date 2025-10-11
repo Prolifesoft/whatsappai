@@ -5,7 +5,7 @@ import CreateAgentModal from './CreateAgentModal';
 interface AgentsPageProps {
     agents: Agent[];
     onSelectAgent: (agent: Agent) => void;
-    onAddAgent: (data: { name: string; phone: string }) => void;
+    onAddAgent: (data: { name: string; phone: string; evolutionInstance?: Agent['evolutionInstance'] }) => Promise<void>;
 }
 
 const AgentCard: React.FC<{ agent: Agent, onSelect: () => void }> = ({ agent, onSelect }) => (
@@ -57,7 +57,7 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agents, onSelectAgent, onAddAge
                 </div>
             </div>
 
-            <CreateAgentModal 
+            <CreateAgentModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSave={onAddAgent}

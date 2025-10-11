@@ -14,6 +14,15 @@ export interface KnowledgeItem {
     content: string;
 }
 
+export interface EvolutionInstance {
+    name: string;
+    token: string;
+    channel: 'baileys';
+    number: string;
+    managerUrl?: string;
+    createdAt: string;
+}
+
 export interface Agent {
     id: string;
     name: string;
@@ -22,6 +31,7 @@ export interface Agent {
     phone: string | null;
     systemPrompt: string;
     knowledgeBase: KnowledgeItem[];
+    evolutionInstance?: EvolutionInstance;
 }
 
 export interface User {
@@ -58,13 +68,30 @@ const getInitials = (name: string): string => {
 
 const MOCK_AGENTS: Agent[] = [
     {
-        id: 'agent-1', name: 'Satış Destek Asistanı', status: 'active', template: 'E-Ticaret', phone: '+90 555 123 4567',
+        id: 'agent-1',
+        name: 'Satış Destek Asistanı',
+        status: 'active',
+        template: 'E-Ticaret',
+        phone: '+90 555 123 4567',
         systemPrompt: 'Sen bir e-ticaret sitesi için çalışan, arkadaş canlısı ve yardımsever bir satış asistanısın. Müşterilerin ürünler hakkında sorduğu soruları cevapla, sipariş durumunu kontrol et ve onlara yardımcı ol.',
         knowledgeBase: [ { id: 'kb-1', type: 'text', title: 'İade Politikası', content: 'Ürünleri 14 gün içinde koşulsuz iade edebilirsiniz.' } ],
+        evolutionInstance: {
+            name: 'satis-destek-asistani',
+            token: 'demo-token-satis-destek',
+            channel: 'baileys',
+            number: '+905551234567',
+            managerUrl: 'https://serwer.prolifesoft.com/manager',
+            createdAt: new Date().toISOString(),
+        },
     },
     {
-        id: 'agent-2', name: 'Klinik Randevu Botu', status: 'inactive', template: 'Sağlık', phone: null,
-        systemPrompt: 'Sen bir tıp merkezi için randevu planlama asistanısın...', knowledgeBase: [],
+        id: 'agent-2',
+        name: 'Klinik Randevu Botu',
+        status: 'inactive',
+        template: 'Sağlık',
+        phone: null,
+        systemPrompt: 'Sen bir tıp merkezi için randevu planlama asistanısın...',
+        knowledgeBase: [],
     }
 ];
 
@@ -172,16 +199,20 @@ export const getAgents = (userId: string): Promise<Agent[]> => simulateNetwork((
 });
 
 // FIX: Corrected function signature and implementation.
-export const createAgent = (userId: string, data: { name: string; phone: string }): Promise<Agent> => simulateNetwork(() => {
+export const createAgent = (
+    userId: string,
+    data: { name: string; phone: string; evolutionInstance?: EvolutionInstance }
+): Promise<Agent> => simulateNetwork(() => {
   const db = _getDb();
   const newAgent: Agent = {
     id: `agent-${Date.now()}`,
     name: data.name,
-    status: data.phone ? 'active' : 'inactive',
+    status: 'inactive',
     template: 'Genel',
     phone: data.phone || null,
     systemPrompt: 'Sen genel amaçlı bir asistansın...',
     knowledgeBase: [],
+    evolutionInstance: data.evolutionInstance,
   };
   if (!db.agents[userId]) db.agents[userId] = [];
   db.agents[userId].push(newAgent);

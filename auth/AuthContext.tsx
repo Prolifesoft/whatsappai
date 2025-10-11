@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import * as api from '../api/mockApi';
 // FIX: Import types from mockApi.tsx to break circular dependency.
-import type { User, Agent, Template, KnowledgeItem, UserPlan } from '../api/mockApi';
+import type { User, Agent, Template, KnowledgeItem, UserPlan, EvolutionInstance } from '../api/mockApi';
 
 interface AuthContextType {
   user: User | null;
@@ -15,7 +15,7 @@ interface AuthContextType {
   addTemplate: (template: Template) => Promise<void>;
   updateTemplate: (originalName: string, newTemplate: Template) => Promise<void>;
   deleteTemplate: (templateName: string) => Promise<void>;
-  addAgent: (data: { name: string; phone: string }) => Promise<void>;
+  addAgent: (data: { name: string; phone: string; evolutionInstance?: EvolutionInstance }) => Promise<void>;
   updateAgent: (updatedAgent: Agent) => Promise<void>;
   deleteAgent: (agentId: string) => Promise<void>;
 }
@@ -108,7 +108,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const addAgent = async (data: { name: string; phone: string }) => {
+  const addAgent = async (data: { name: string; phone: string; evolutionInstance?: EvolutionInstance }) => {
     if (user) {
       const newAgent = await api.createAgent(user.id, data);
       setAgents(prev => [...prev, newAgent]);
