@@ -44,13 +44,19 @@ const AgentDetailPage: React.FC<AgentDetailPageProps> = ({
     };
 
     const handleDisconnect = (agentId: string) => {
-        onUpdateAgent({ ...agent, phone: null, status: 'inactive' });
+        const evolutionInstance = agent.evolutionInstance
+            ? { ...agent.evolutionInstance, number: agent.evolutionInstance.number }
+            : undefined;
+        onUpdateAgent({ ...agent, phone: null, status: 'inactive', evolutionInstance });
     };
-    
+
     const handleConnect = (agentId: string, phone: string) => {
-        onUpdateAgent({ ...agent, phone, status: 'inactive' }); // inactive until confirmed
+        const evolutionInstance = agent.evolutionInstance
+            ? { ...agent.evolutionInstance, number: phone }
+            : undefined;
+        onUpdateAgent({ ...agent, phone, status: 'inactive', evolutionInstance }); // inactive until confirmed
     };
-    
+
     const handleConfirmConnection = (agentId: string) => {
         onUpdateAgent({ ...agent, status: 'active' });
     };
