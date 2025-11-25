@@ -3,6 +3,9 @@ import * as api from '../api/mockApi';
 // FIX: Import types from mockApi.tsx to break circular dependency.
 import type { User, Agent, Template, KnowledgeItem, UserPlan } from '../api/mockApi';
 
+// Re-export types so consumers of AuthContext can use them
+export type { User, Agent, Template, KnowledgeItem, UserPlan };
+
 interface AuthContextType {
   user: User | null;
   agents: Agent[];

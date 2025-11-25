@@ -1,4 +1,4 @@
-// FIX: Moved type definitions here from AuthContext.tsx to break circular dependency.
+// Tip tanımlamaları
 export type UserPlan = 'Başlangıç' | 'Profesyonel' | 'Kurumsal';
 
 export interface Template {
@@ -38,15 +38,23 @@ export interface User {
   };
 }
 
+// PHP API'nizin bulunduğu yol. React build alıp aynı sunucuya atacağınız için relative path kullanıyoruz.
+// "api" klasörünü public_html içine oluşturduğunuzu varsayıyoruz.
+const API_URL = '/api';
 
-// --- DATABASE SIMULATION ---
-const DB_KEY = 'agentai_db';
-
-interface Database {
-  users: User[];
-  agents: { [userId: string]: Agent[] };
-  templates: { [userId: string]: Template[] };
-}
+const handleResponse = async (response: Response) => {
+    const text = await response.text();
+    try {
+        const data = JSON.parse(text);
+        if (!response.ok) {
+            throw new Error(data.message || 'API Hatası');
+        }
+        return data;
+    } catch (e) {
+        console.error("JSON Parse Error:", text);
+        throw new Error('Sunucu yanıtı geçersiz.');
+    }
+};
 
 const getInitials = (name: string): string => {
   const parts = name.split(' ');
@@ -56,194 +64,110 @@ const getInitials = (name: string): string => {
   return name.substring(0, 2).toUpperCase();
 };
 
-const MOCK_AGENTS: Agent[] = [
-    {
-        id: 'agent-1', name: 'Satış Destek Asistanı', status: 'active', template: 'E-Ticaret', phone: '+90 555 123 4567',
-        systemPrompt: 'Sen bir e-ticaret sitesi için çalışan, arkadaş canlısı ve yardımsever bir satış asistanısın. Müşterilerin ürünler hakkında sorduğu soruları cevapla, sipariş durumunu kontrol et ve onlara yardımcı ol.',
-        knowledgeBase: [ { id: 'kb-1', type: 'text', title: 'İade Politikası', content: 'Ürünleri 14 gün içinde koşulsuz iade edebilirsiniz.' } ],
-    },
-    {
-        id: 'agent-2', name: 'Klinik Randevu Botu', status: 'inactive', template: 'Sağlık', phone: null,
-        systemPrompt: 'Sen bir tıp merkezi için randevu planlama asistanısın...', knowledgeBase: [],
-    }
-];
+// --- AUTH API ---
 
-const MOCK_TEMPLATES: Template[] = [
-    { name: 'Özel', prompt: 'Sen, sahibi tarafından özelleştirilecek bir asistansın.', isCustom: true },
-];
-
-
-const initializeDb = (): Database => {
-  const defaultUser: User = {
-    id: 'user-123', name: 'Demo Kullanıcı', email: 'demo@agentai.com', initials: 'DK', plan: 'Profesyonel',
-    usage: { messages: { sent: 7850, limit: 10000 } },
-  };
-
-  const db: Database = {
-    users: [defaultUser],
-    agents: { [defaultUser.id]: MOCK_AGENTS },
-    templates: { [defaultUser.id]: MOCK_TEMPLATES },
-  };
-  localStorage.setItem(DB_KEY, JSON.stringify(db));
-  return db;
+export const login = async (email: string, pass: string): Promise<User> => {
+    const response = await fetch(`${API_URL}/auth.php?action=login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass }),
+    });
+    return handleResponse(response);
 };
 
-const _getDb = (): Database => {
-  const dbString = localStorage.getItem(DB_KEY);
-  return dbString ? JSON.parse(dbString) : initializeDb();
+export const register = async (name: string, email: string, pass: string): Promise<User> => {
+    const response = await fetch(`${API_URL}/auth.php?action=register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            name, 
+            email, 
+            password: pass,
+            initials: getInitials(name)
+        }),
+    });
+    return handleResponse(response);
 };
 
-const _saveDb = (db: Database) => {
-  localStorage.setItem(DB_KEY, JSON.stringify(db));
+export const updateUser = async (userId: string, updates: Partial<User>): Promise<User> => {
+    // PHP tarafında tam bir user update endpoint'i api.php içine eklenebilir.
+    // Şimdilik simüle ediyoruz veya auth.php'ye ekleyebilirsiniz.
+    // Gerçekte backend'den güncel user'ı çekmelisiniz.
+    return { ...updates } as User; 
 };
 
-// --- MOCK API FUNCTIONS ---
+// --- AGENT API ---
 
-// FIX: Corrected generic function syntax for simulateNetwork.
-const simulateNetwork = <T,>(callback: () => T): Promise<T> => {
-  return new Promise<T>((resolve, reject) => {
-    setTimeout(() => {
-      try {
-        const result = callback();
-        resolve(result);
-      } catch (error) {
-        reject(error);
-      }
-    }, 500); // 500ms delay
-  });
+export const getAgents = async (userId: string): Promise<Agent[]> => {
+    const response = await fetch(`${API_URL}/api.php?resource=agents&userId=${userId}`);
+    return handleResponse(response);
 };
 
-// --- User API ---
-// FIX: Corrected function signature and logic.
-export const login = (email: string, pass: string): Promise<User> => simulateNetwork(() => {
-  const db = _getDb();
-  const user = db.users.find(u => u.email === email); // In real life, check password hash
-  if (user && pass) { // Simple pass check for mock
-    return user;
-  }
-  throw new Error('Invalid credentials');
-});
+export const createAgent = async (userId: string, data: { name: string; phone: string }): Promise<Agent> => {
+    const response = await fetch(`${API_URL}/api.php?resource=agents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            userId,
+            name: data.name,
+            phone: data.phone,
+            status: data.phone ? 'active' : 'inactive',
+            template: 'Genel',
+            systemPrompt: 'Sen genel amaçlı bir asistansın...'
+        }),
+    });
+    return handleResponse(response);
+};
 
-// FIX: Corrected function signature and implementation.
-export const register = (name: string, email: string, pass: string): Promise<User> => simulateNetwork(() => {
-  const db = _getDb();
-  if (db.users.some(u => u.email === email)) {
-    throw new Error('User already exists');
-  }
-  const newUser: User = {
-    id: `user-${Date.now()}`,
-    name,
-    email,
-    initials: getInitials(name),
-    plan: 'Başlangıç',
-    usage: { messages: { sent: 0, limit: 2500 } },
-  };
-  db.users.push(newUser);
-  db.agents[newUser.id] = [];
-  db.templates[newUser.id] = MOCK_TEMPLATES;
-  _saveDb(db);
-  return newUser;
-});
+export const updateAgent = async (userId: string, updatedAgent: Agent): Promise<Agent> => {
+    const response = await fetch(`${API_URL}/api.php?resource=agents&id=${updatedAgent.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedAgent),
+    });
+    return handleResponse(response);
+};
 
-// FIX: Corrected function signature and implementation with trailing comma for JSX parser hint.
-export const updateUser = (userId: string, updates: Partial<User>): Promise<User> => simulateNetwork(() => {
-    const db = _getDb();
-    const userIndex = db.users.findIndex(u => u.id === userId);
-    if (userIndex === -1) throw new Error('User not found');
-    
-    if (updates.plan) {
-        const newLimit = updates.plan === 'Profesyonel' ? 10000 : updates.plan === 'Kurumsal' ? Infinity : 2500;
-        db.users[userIndex].plan = updates.plan;
-        db.users[userIndex].usage.limit = newLimit;
-    }
-    
-    const updatedUser = { ...db.users[userIndex], ...updates, };
-    db.users[userIndex] = updatedUser;
-    
-    _saveDb(db);
-    return updatedUser;
-});
+export const deleteAgent = async (userId: string, agentId: string): Promise<void> => {
+    await fetch(`${API_URL}/api.php?resource=agents&id=${agentId}`, {
+        method: 'DELETE',
+    });
+};
 
-// --- Agent API ---
-// FIX: Corrected function signature.
-export const getAgents = (userId: string): Promise<Agent[]> => simulateNetwork(() => {
-  const db = _getDb();
-  return db.agents[userId] || [];
-});
+// --- TEMPLATE API ---
 
-// FIX: Corrected function signature and implementation.
-export const createAgent = (userId: string, data: { name: string; phone: string }): Promise<Agent> => simulateNetwork(() => {
-  const db = _getDb();
-  const newAgent: Agent = {
-    id: `agent-${Date.now()}`,
-    name: data.name,
-    status: data.phone ? 'active' : 'inactive',
-    template: 'Genel',
-    phone: data.phone || null,
-    systemPrompt: 'Sen genel amaçlı bir asistansın...',
-    knowledgeBase: [],
-  };
-  if (!db.agents[userId]) db.agents[userId] = [];
-  db.agents[userId].push(newAgent);
-  _saveDb(db);
-  return newAgent;
-});
+export const getTemplates = async (userId: string): Promise<Template[]> => {
+    const response = await fetch(`${API_URL}/api.php?resource=templates&userId=${userId}`);
+    return handleResponse(response);
+};
 
-// FIX: Corrected function signature.
-export const updateAgent = (userId: string, updatedAgent: Agent): Promise<Agent> => simulateNetwork(() => {
-  const db = _getDb();
-  const userAgents = db.agents[userId];
-  if (!userAgents) throw new Error('User agents not found');
-  const agentIndex = userAgents.findIndex(a => a.id === updatedAgent.id);
-  if (agentIndex === -1) throw new Error('Agent not found');
-  userAgents[agentIndex] = updatedAgent;
-  _saveDb(db);
-  return updatedAgent;
-});
+export const createTemplate = async (userId: string, template: Template): Promise<Template> => {
+    const response = await fetch(`${API_URL}/api.php?resource=templates`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, ...template }),
+    });
+    return handleResponse(response);
+};
 
-// FIX: Corrected function signature and implementation.
-export const deleteAgent = (userId: string, agentId: string): Promise<void> => simulateNetwork(() => {
-  const db = _getDb();
-  if (db.agents[userId]) {
-    db.agents[userId] = db.agents[userId].filter(a => a.id !== agentId);
-    _saveDb(db);
-  }
-});
+export const updateTemplate = async (userId: string, originalName: string, newTemplate: Template): Promise<Template> => {
+    // Basitlik adına PHP tarafında update endpoint'i tam yazılmadıysa create gibi davranabilir
+    // veya api.php'ye template update case'i eklenebilir.
+    return newTemplate;
+};
 
-// --- Template API ---
-// FIX: Corrected function signature.
-export const getTemplates = (userId: string): Promise<Template[]> => simulateNetwork(() => {
-  const db = _getDb();
-  return db.templates[userId] || [];
-});
+export const deleteTemplate = async (userId: string, templateName: string): Promise<void> => {
+    // api.php'de template delete case'i eklenebilir.
+};
 
-// FIX: Corrected function signature and implementation with trailing comma for JSX parser hint.
-export const createTemplate = (userId: string, template: Template): Promise<Template> => simulateNetwork(() => {
-  const db = _getDb();
-  const newTemplate = { ...template, isCustom: true, };
-  if (!db.templates[userId]) db.templates[userId] = [];
-  db.templates[userId].push(newTemplate);
-  _saveDb(db);
-  return newTemplate;
-});
 
-// FIX: Corrected function signature and implementation with trailing comma for JSX parser hint.
-export const updateTemplate = (userId: string, originalName: string, newTemplate: Template): Promise<Template> => simulateNetwork(() => {
-  const db = _getDb();
-  const userTemplates = db.templates[userId];
-  if (!userTemplates) throw new Error('User templates not found');
-  const templateIndex = userTemplates.findIndex(t => t.name === originalName);
-  if (templateIndex === -1) throw new Error('Template not found');
-  userTemplates[templateIndex] = { ...newTemplate, isCustom: true, };
-  _saveDb(db);
-  return newTemplate;
-});
+// --- PAYTR API ---
 
-// FIX: Corrected function signature and implementation.
-export const deleteTemplate = (userId: string, templateName: string): Promise<void> => simulateNetwork(() => {
-  const db = _getDb();
-  if (db.templates[userId]) {
-    db.templates[userId] = db.templates[userId].filter(t => t.name !== templateName);
-    _saveDb(db);
-  }
-});
+export const getPaytrToken = async (userId: string, plan: string, price: number): Promise<{status: string, token: string, reason?: string}> => {
+    const response = await fetch(`${API_URL}/paytr_token.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, plan, price }),
+    });
+    return handleResponse(response);
+};
